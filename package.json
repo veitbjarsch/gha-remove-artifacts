@@ -10,10 +10,6 @@
     "lint": "eslint . --no-error-on-unmatched-pattern",
     "lint:fix": "eslint . --no-error-on-unmatched-pattern --fix"
   },
-  "pre-commit": [
-    "lint",
-    "test"
-  ],
   "keywords": [
     "github",
     "action",
@@ -22,18 +18,12 @@
   ],
   "author": "c-hive",
   "license": "MIT",
-  "//dependencies": {},
   "dependencies": {
     "@actions/core": "^1.2.2",
     "@octokit/action": "^2.0.0",
     "@octokit/plugin-throttling": "^3.2.0",
     "moment": "^2.24.0",
     "yn": "^4.0.0"
-  },
-  "//devDependencies": {
-    "eslint*": "code style",
-    "pre-commit": "run scripts before each commit",
-    "prettier": "code formatting"
   },
   "devDependencies": {
     "@zeit/ncc": "^0.21.1",
@@ -44,7 +34,6 @@
     "eslint-config-prettier": "^4.2.0",
     "eslint-plugin-import": "^2.20.1",
     "eslint-plugin-prettier": "^3.1.2",
-    "pre-commit": "^1.2.2",
     "prettier": "^1.19.1"
   },
   "engines": {

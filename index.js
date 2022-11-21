@@ -138,30 +138,34 @@ async function run() {
 
       return data;
     })
-    .then(workflowRuns => {
-      const artifactPromises = workflowRuns
-        .filter(workflowRun => {
-          const skipTaggedWorkflow =
-            configs.skipTags && taggedCommits.includes(workflowRun.head_sha);
+    .then(async workflowRuns => {
+      const artifactPromises = [];
+      const filteredRuns = workflowRuns.filter(workflowRun => {
+        const skipTaggedWorkflow =
+          configs.skipTags && taggedCommits.includes(workflowRun.head_sha);
 
-          if (skipTaggedWorkflow) {
-            console.log(`Skipping tagged run ${workflowRun.head_sha}`);
+        if (skipTaggedWorkflow) {
+          console.log(`Skipping tagged run ${workflowRun.head_sha}`);
 
-            return false;
+          return false;
+        }
+
+        return true;
+      });
+
+      for (const workflowRun of filteredRuns) {
+        const workflowRunArtifactsRequest = octokit.actions.listWorkflowRunArtifacts.endpoint.merge(
+          {
+            ...configs.repo,
+            per_page: configs.pagination.perPage,
+            run_id: workflowRun.id,
           }
+        );
 
-          return true;
-        })
-        .map(workflowRun => {
-          const workflowRunArtifactsRequest = octokit.actions.listWorkflowRunArtifacts.endpoint.merge(
-            {
-              ...configs.repo,
-              per_page: configs.pagination.perPage,
-              run_id: workflowRun.id,
-            }
-          );
-
-          return octokit.paginate(workflowRunArtifactsRequest).then(artifacts =>
+        const workflowRunArtifactsRequestPromise = octokit
+          .paginate(workflowRunArtifactsRequest)
+          /* eslint-disable-next-line no-loop-func */
+          .then(artifacts =>
             artifacts
               .filter(artifact => {
                 const skipRecentArtifact =
@@ -182,7 +186,7 @@ async function run() {
 
                 return createdAt.isBefore(configs.maxAge);
               })
-              .map(artifact => {
+              .map(async artifact => {
                 if (devEnv) {
                   return new Promise(resolve => {
                     console.log(
@@ -205,7 +209,11 @@ async function run() {
                   });
               })
           );
-        });
+
+        artifactPromises.push(workflowRunArtifactsRequestPromise);
+        // eslint-disable-next-line no-await-in-loop
+        await workflowRunArtifactsRequestPromise;
+      }
 
       return Promise.all(artifactPromises).then(artifactDeletePromises =>
         Promise.all([].concat(...artifactDeletePromises))
