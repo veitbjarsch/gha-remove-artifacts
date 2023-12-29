@@ -77,7 +77,7 @@ async function run() {
 
         console.log(`Retrying after ${retryAfter} seconds!`);
 
-        return configs.retriesEnabled;
+        return configs.retriesEnabled ?  retryAfter < 300 : false;
       },
       onAbuseLimit: (retryAfter, options) => {
         console.error(
@@ -86,7 +86,7 @@ async function run() {
 
         console.log(`Retrying after ${retryAfter} seconds!`);
 
-        return configs.retriesEnabled;
+        return configs.retriesEnabled ?  retryAfter < 300 : false;
       },
     },
   });
