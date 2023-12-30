@@ -75,7 +75,7 @@ async function run() {
           `Request quota exhausted for request ${options.method} ${options.url}, number of total global retries: ${options.request.retryCount}`
         );
 
-        console.log(`Retrying after ${retryAfter} seconds!`);
+        console.log(`Retrying after ${retryAfter} seconds!`, typeof retryAfter,  retryAfter < 300);
 
         return configs.retriesEnabled ?  retryAfter < 300 : false;
       },
@@ -84,7 +84,7 @@ async function run() {
           `Abuse detected for request ${options.method} ${options.url}, retry count: ${options.request.retryCount}`
         );
 
-        console.log(`Retrying after ${retryAfter} seconds!`);
+        console.log(`Retrying after ${retryAfter} seconds!`, typeof retryAfter,  retryAfter < 300);
 
         return configs.retriesEnabled ?  retryAfter < 300 : false;
       },
