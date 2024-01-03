@@ -27,7 +27,7 @@ function readInput(key, isRequired = false) {
 
 function getConfigs() {
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
-  const [age, units] = readInput(inputKeys.AGE, true).split(" ");
+  const [age = 5, units = 'days'] = readInput(inputKeys.AGE, true).split(" ");
   const maxAge = moment().subtract(age, units);
 
   console.log(
