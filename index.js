@@ -27,7 +27,9 @@ function readInput(key, isRequired = false) {
 
 function getConfigs() {
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
-  const [age = 5, units = 'days'] = readInput(inputKeys.AGE, true).split(" ");
+  const inputAge = readInput(inputKeys.AGE, true).split(" ");
+  console.log("inputAge", inputAge);
+  const [age = 5, units = "days"] = inputAge;
   const maxAge = moment().subtract(age, units);
 
   console.log(
@@ -75,18 +77,26 @@ async function run() {
           `Request quota exhausted for request ${options.method} ${options.url}, number of total global retries: ${options.request.retryCount}`
         );
 
-        console.log(`Retrying after ${retryAfter} seconds!`, typeof retryAfter,  retryAfter < 300);
+        if (configs.retriesEnabled && retryAfter < 300) {
+          console.log(`Retrying after ${retryAfter} seconds!`);
+          return true;
+        }
 
-        return configs.retriesEnabled ?  retryAfter < 300 : false;
+        console.log(`Skip retrying. Try manually after ${retryAfter} seconds!`);
+        return false;
       },
       onAbuseLimit: (retryAfter, options) => {
         console.error(
           `Abuse detected for request ${options.method} ${options.url}, retry count: ${options.request.retryCount}`
         );
 
-        console.log(`Retrying after ${retryAfter} seconds!`, typeof retryAfter,  retryAfter < 300);
+        if (configs.retriesEnabled && retryAfter < 300) {
+          console.log(`Retrying after ${retryAfter} seconds!`);
+          return true;
+        }
 
-        return configs.retriesEnabled ?  retryAfter < 300 : false;
+        console.log(`Skip retrying. Try manually after ${retryAfter} seconds!`);
+        return false;
       },
     },
   });
